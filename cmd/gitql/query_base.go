@@ -32,7 +32,9 @@ func (c *cmdQueryBase) buildDatabase() error {
 	}
 
 	c.name = filepath.Base(filepath.Join(c.Path, ".."))
-	gitql.DefaultEngine.AddDatabase(git.NewDatabase(c.name, r))
+	if err := gitql.DefaultEngine.AddDatabase(git.NewDatabase(c.name, r)); err != nil {
+		return err
+	}
 	c.db, err = sql.Open(gitql.DriverName, "")
 	return err
 }

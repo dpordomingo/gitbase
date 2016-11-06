@@ -107,7 +107,7 @@ func newEngine(t *testing.T) *gitql.Engine {
 	db.AddTable("mytable", table)
 
 	e := gitql.New()
-	e.AddDatabase(db)
+	assert.Nil(e.AddDatabase(db))
 
 	return e
 }

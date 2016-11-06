@@ -69,6 +69,15 @@ func (e *Engine) Open(name string) (driver.Conn, error) {
 	return &session{Engine: e}, nil
 }
 
+func (e *Engine) AddDatabase(db sql.Database) error {
+	if err := e.Catalog.AddDatabase(db); err != nil {
+		return err
+	}
+
+	e.Analyzer.CurrentDatabase = db.Name()
+	return nil
+}
+
 // Query executes a query without attaching to any session.
 func (e *Engine) Query(query string) (sql.Schema, sql.RowIter, error) {
 	parsed, err := parse.Parse(query)
@@ -87,11 +96,6 @@ func (e *Engine) Query(query string) (sql.Schema, sql.RowIter, error) {
 	}
 
 	return analyzed.Schema(), iter, nil
-}
-
-func (e *Engine) AddDatabase(db sql.Database) {
-	e.Catalog.Databases = append(e.Catalog.Databases, db)
-	e.Analyzer.CurrentDatabase = db.Name()
 }
 
 // Session represents a SQL session.
