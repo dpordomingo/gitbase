@@ -1,11 +1,13 @@
 package gitql
 
 import (
-	gosql "database/sql"
-	"database/sql/driver"
 	"errors"
 	"fmt"
 
+	gosql "database/sql"
+	"database/sql/driver"
+
+	"github.com/gitql/gitql/metadata"
 	"github.com/gitql/gitql/sql"
 	"github.com/gitql/gitql/sql/analyzer"
 	"github.com/gitql/gitql/sql/expression"
@@ -58,6 +60,12 @@ func New() *Engine {
 	}
 
 	a := analyzer.New(c)
+
+	m := metadata.NewDB(c)
+	if err := c.AddDatabase(m); err != nil {
+		panic(fmt.Sprintf("could not create catalog metadata database\n%s", err.Error()))
+	}
+
 	return &Engine{c, a}
 }
 
@@ -74,7 +82,15 @@ func (e *Engine) AddDatabase(db sql.Database) error {
 		return err
 	}
 
-	e.Analyzer.CurrentDatabase = db.Name()
+	return e.CurrentDatabase(db.Name())
+}
+
+func (e *Engine) CurrentDatabase(name string) error {
+	if _, err := e.Catalog.Database(name); err != nil {
+		return err
+	}
+
+	e.Analyzer.CurrentDatabase = name
 	return nil
 }
 

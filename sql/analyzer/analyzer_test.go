@@ -19,8 +19,8 @@ func TestAnalyzer_Analyze(t *testing.T) {
 	table := mem.NewTable("mytable", sql.Schema{{"i", sql.Integer}})
 	table2 := mem.NewTable("mytable2", sql.Schema{{"i2", sql.Integer}})
 	db := mem.NewDatabase("mydb")
-	db.AddTable("mytable", table)
-	db.AddTable("mytable2", table2)
+	db.AddTable(table)
+	db.AddTable(table2)
 
 	catalog := sql.NewCatalog()
 	catalog.AddDatabase(db)
