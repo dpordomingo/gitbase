@@ -57,7 +57,7 @@ func createTestDatabase() *mem.Database {
 		gitqlsql.Column{Name: "name", Type: gitqlsql.String},
 		gitqlsql.Column{Name: "email", Type: gitqlsql.String},
 	})
-	db.AddTable("mytable", table)
+	db.AddTable(table)
 	table.Insert(gitqlsql.NewRow("John Doe", "john@doe.com"))
 	table.Insert(gitqlsql.NewRow("John Doe", "johnalt@doe.com"))
 	table.Insert(gitqlsql.NewRow("Jane Doe", "jane@doe.com"))
