@@ -1,11 +1,13 @@
 package gitql
 
 import (
-	gosql "database/sql"
-	"database/sql/driver"
 	"errors"
 	"fmt"
 
+	gosql "database/sql"
+	"database/sql/driver"
+
+	"github.com/gitql/gitql/metadata"
 	"github.com/gitql/gitql/sql"
 	"github.com/gitql/gitql/sql/analyzer"
 	"github.com/gitql/gitql/sql/expression"
@@ -45,7 +47,7 @@ var DefaultEngine = New()
 // It implements the standard database/sql/driver/Driver interface, so it can
 // be registered as a database/sql driver.
 type Engine struct {
-	Catalog  *sql.Catalog
+	Catalog  sql.DBStorer
 	Analyzer *analyzer.Analyzer
 }
 
@@ -58,6 +60,12 @@ func New() *Engine {
 	}
 
 	a := analyzer.New(c)
+
+	m := metadata.NewDB(c)
+	if err := c.AddDatabase(m); err != nil {
+		panic(fmt.Sprintf("could not create catalog metadata database\n%s", err.Error()))
+	}
+
 	return &Engine{c, a}
 }
 
@@ -67,6 +75,23 @@ func New() *Engine {
 // Name parameter is ignored.
 func (e *Engine) Open(name string) (driver.Conn, error) {
 	return &session{Engine: e}, nil
+}
+
+func (e *Engine) AddDatabase(db sql.Database) error {
+	if err := e.Catalog.AddDatabase(db); err != nil {
+		return err
+	}
+
+	return e.CurrentDatabase(db.Name())
+}
+
+func (e *Engine) CurrentDatabase(name string) error {
+	if _, err := e.Catalog.Database(name); err != nil {
+		return err
+	}
+
+	e.Analyzer.CurrentDatabase = name
+	return nil
 }
 
 // Query executes a query without attaching to any session.
@@ -87,11 +112,6 @@ func (e *Engine) Query(query string) (sql.Schema, sql.RowIter, error) {
 	}
 
 	return analyzed.Schema(), iter, nil
-}
-
-func (e *Engine) AddDatabase(db sql.Database) {
-	e.Catalog.Databases = append(e.Catalog.Databases, db)
-	e.Analyzer.CurrentDatabase = db.Name()
 }
 
 // Session represents a SQL session.

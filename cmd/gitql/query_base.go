@@ -8,6 +8,7 @@ import (
 	"github.com/gitql/gitql"
 	"github.com/gitql/gitql/git"
 	"github.com/gitql/gitql/internal/format"
+	"github.com/gitql/gitql/metadata"
 
 	gogit "srcd.works/go-git.v4"
 	"srcd.works/go-git.v4/utils/ioutil"
@@ -32,7 +33,17 @@ func (c *cmdQueryBase) buildDatabase() error {
 	}
 
 	c.name = filepath.Base(filepath.Join(c.Path, ".."))
-	gitql.DefaultEngine.AddDatabase(git.NewDatabase(c.name, r))
+	if err := gitql.DefaultEngine.AddDatabase(git.NewDatabase("gitql", r)); err != nil {
+		return err
+	}
+
+	//TODO: LEFTOVER !!!
+	if true {
+		if err := gitql.DefaultEngine.CurrentDatabase(metadata.SchemaDBname); err != nil {
+			return err
+		}
+	}
+
 	c.db, err = sql.Open(gitql.DriverName, "")
 	return err
 }

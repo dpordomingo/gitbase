@@ -4,6 +4,7 @@ import (
 	"io"
 )
 
+type Value interface{}
 type Row []Value
 
 func NewRow(values ...interface{}) Row {
@@ -21,7 +22,9 @@ func (r Row) Copy() Row {
 	return r
 }
 
-type Value interface{}
+func (r Row) Columns() []Value {
+	return r
+}
 
 type RowIter interface {
 	Next() (Row, error)

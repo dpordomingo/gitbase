@@ -1,4 +1,4 @@
-package mem
+package memory
 
 import "github.com/gitql/gitql/sql"
 
@@ -22,6 +22,8 @@ func (d *Database) Tables() map[string]sql.Table {
 	return d.tables
 }
 
-func (d *Database) AddTable(t sql.Table) {
-	d.tables[t.Name()] = t
+func (d *Database) AddTable(tables ...sql.Table) {
+	for _, table := range tables {
+		d.tables[table.Name()] = table
+	}
 }
