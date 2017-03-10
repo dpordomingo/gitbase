@@ -4,10 +4,10 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"gopkg.in/sqle/sqle.v0/memory"
 	"gopkg.in/sqle/sqle.v0/sql"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSchemata(t *testing.T) {

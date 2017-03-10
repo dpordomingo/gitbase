@@ -3,7 +3,6 @@ package metadata
 import (
 	"fmt"
 	"io"
-
 	"time"
 
 	"gopkg.in/sqle/sqle.v0/memory"
