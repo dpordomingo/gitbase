@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"io"
 
+	"gopkg.in/sqle/sqle.v0/memory"
 	"gopkg.in/sqle/sqle.v0/sql"
 )
 
 type Table struct {
 	name   string
 	schema sql.Schema
-	data   []sql.Row
+	data   [][]interface{}
 }
 
 func NewTable(name string, schema sql.Schema) *Table {
@@ -37,7 +38,7 @@ func (t *Table) Children() []sql.Node {
 }
 
 func (t *Table) RowIter() (sql.RowIter, error) {
-	return &iter{rows: t.data}, nil
+	return memory.NewIter(&container{data: t.data}), nil
 }
 
 func (t *Table) TransformUp(f func(sql.Node) sql.Node) sql.Node {
@@ -60,7 +61,11 @@ func (t *Table) Insert(row sql.Row) error {
 		}
 	}
 
-	t.data = append(t.data, row.Copy())
+	crow := make([]interface{}, len(row))
+	for i, col := range row {
+		crow[i] = col
+	}
+	t.data = append(t.data, crow)
 	return nil
 }
 
@@ -82,4 +87,16 @@ func (i *iter) Next() (sql.Row, error) {
 func (i *iter) Close() error {
 	i.rows = nil
 	return nil
+}
+
+type container struct {
+	data [][]interface{}
+}
+
+func (i *container) Get(idx int) []interface{} {
+	return i.data[idx]
+}
+
+func (i *container) Length() int {
+	return len(i.data)
 }
