@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"os"
-	"path/filepath"
+	"regexp"
 
 	"gopkg.in/sqle/gitql.v0"
 	"gopkg.in/sqle/gitql.v0/internal/format"
@@ -12,6 +12,10 @@ import (
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/utils/ioutil"
 )
+
+var gitDBname = "gitql"
+
+var dbNameRegExp = regexp.MustCompile(`(?i)select\s+[\s\S]+?\s+from\s+([^\s\.]+)\.`)
 
 type cmdQueryBase struct {
 	cmd
@@ -31,13 +35,22 @@ func (c *cmdQueryBase) buildDatabase() error {
 		return err
 	}
 
-	c.name = filepath.Base(filepath.Join(c.Path, ".."))
-	sqle.DefaultEngine.AddDatabase(gitquery.NewDatabase(c.name, r))
+	c.name = gitDBname
+	if err := sqle.DefaultEngine.AddDatabase(gitquery.NewDatabase(gitDBname, r)); err != nil {
+		return err
+	}
+
 	c.db, err = sql.Open(sqle.DriverName, "")
 	return err
 }
 
 func (c *cmdQueryBase) executeQuery(sql string) (*sql.Rows, error) {
+	if currentDatabaseName := readDBName(sql); currentDatabaseName != "" {
+		if err := sqle.DefaultEngine.CurrentDatabase(currentDatabaseName); err != nil {
+			return nil, err
+		}
+	}
+
 	c.print("executing %q at %q\n", sql, c.name)
 	return c.db.Query(sql)
 }
@@ -81,4 +94,13 @@ func (c *cmdQueryBase) printQuery(rows *sql.Rows, formatId string) (err error) {
 	}
 
 	return rows.Err()
+}
+
+func readDBName(queryString string) string {
+	matches := dbNameRegExp.FindStringSubmatch(queryString)
+	if len(matches) > 1 {
+		return matches[1]
+	}
+
+	return ""
 }
