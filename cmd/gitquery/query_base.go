@@ -5,11 +5,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"gopkg.in/sqle/gitquery.v0"
-	"gopkg.in/sqle/gitquery.v0/internal/format"
-	"gopkg.in/sqle/sqle.v0"
+	"gopkg.in/sqle/gitql.v0"
+	"gopkg.in/sqle/gitql.v0/internal/format"
 
-	gogit "gopkg.in/src-d/go-git.v4"
+	"gopkg.in/sqle/sqle.v0"
+	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/utils/ioutil"
 )
 
@@ -26,7 +26,7 @@ func (c *cmdQueryBase) buildDatabase() error {
 	c.print("opening %q repository...\n", c.Path)
 
 	var err error
-	r, err := gogit.PlainOpen(c.Path)
+	r, err := git.PlainOpen(c.Path)
 	if err != nil {
 		return err
 	}
