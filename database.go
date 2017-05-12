@@ -42,6 +42,10 @@ func (d *Database) Name() string {
 	return d.name
 }
 
+func (d *Database) Engine() string {
+	return "go-git"
+}
+
 func (d *Database) Tables() map[string]sql.Table {
 	return map[string]sql.Table{
 		commitsTableName:     d.cr,
