@@ -23,6 +23,7 @@ import (
 	"gopkg.in/src-d/go-mysql-server.v0/server"
 	"gopkg.in/src-d/go-mysql-server.v0/sql"
 	"gopkg.in/src-d/go-mysql-server.v0/sql/analyzer"
+	sqleFunc "gopkg.in/src-d/go-mysql-server.v0/sql/expression/function"
 	"gopkg.in/src-d/go-mysql-server.v0/sql/index/pilosa"
 	"gopkg.in/src-d/go-vitess.v1/mysql"
 )
@@ -98,6 +99,8 @@ func NewDatabaseEngine(
 		VersionPostfix: version,
 		Auth:           userAuth,
 	})
+
+	catalog.RegisterFunction("current_user", sql.Function0(sqleFunc.NewCurrentUser("root")))
 
 	return engine
 }
