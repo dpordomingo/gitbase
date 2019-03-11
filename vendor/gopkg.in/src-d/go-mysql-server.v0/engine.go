@@ -71,6 +71,8 @@ func (e *Engine) Query(
 		return getUser(ctx.Client().User)
 	} else if strings.ToLower(query) == "show status" {
 		return getStatus(false, filterNone)
+	} else if strings.ToLower(query) == "show global status" {
+		return getStatus(false, filterNone)
 	} else if strings.HasPrefix(strings.ToLower(query), "show session status like") {
 		// TODO: get content of LIKE filter
 		return getStatus(false, "Ssl_cipher")
